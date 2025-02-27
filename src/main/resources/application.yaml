@@ -6,6 +6,6 @@ ktor:
         port: 8080
     database:
         driver: "org.mariadb.jdbc.Driver"
-        url: "jdbc:mariadb://localhost:3306/dbGoGuide"
+        url: "jdbc:mariadb://localhost:3307/dbGoGuide"
         username: "root"
         password: "root123"

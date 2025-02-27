@@ -6,10 +6,7 @@ import data.security.PasswordHash
 import domain.repository.ReviewRepository
 import domain.repository.UserRepository
 import domain.security.PasswordHashInterface
-import domain.usecase.AddReviewUseCase
-import domain.usecase.GetAllReviewsUseCase
-import domain.usecase.LoginUseCase
-import domain.usecase.RegisterUseCase
+import domain.usecase.*
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -26,8 +23,10 @@ fun Application.module() {
     val reviewRepository: ReviewRepository = ReviewRepositoryImpl()
     val getAllReviewsUseCase = GetAllReviewsUseCase(reviewRepository)
     val addReviewUseCase = AddReviewUseCase(reviewRepository)
+    val editReviewUseCase = EditReviewUseCase(reviewRepository)
+    val deleteReviewUseCase = DeleteReviewUseCase(reviewRepository)
     val loginUseCase = LoginUseCase(userRepository, passwordHash)
     val registerUseCase = RegisterUseCase(userRepository, passwordHash)
 
-    configureRouting(loginUseCase, registerUseCase, getAllReviewsUseCase, addReviewUseCase)
+    configureRouting(loginUseCase, registerUseCase, getAllReviewsUseCase, addReviewUseCase, editReviewUseCase, deleteReviewUseCase)
 }
