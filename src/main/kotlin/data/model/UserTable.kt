@@ -6,4 +6,5 @@ object UserTable : IntIdTable("users") {
     val username = varchar("username", 50).uniqueIndex()
     val email = varchar("email", 100).uniqueIndex()
     val password = varchar("password", 100)
+    val token = varchar("token", 255).nullable()
 }

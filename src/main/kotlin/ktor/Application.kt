@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     configureSerialization()
-
+    configureSecurity()
     configureDatabase()
 
     val userRepository: UserRepository = UserRepositoryImpl()
@@ -28,5 +28,5 @@ fun Application.module() {
     val loginUseCase = LoginUseCase(userRepository, passwordHash)
     val registerUseCase = RegisterUseCase(userRepository, passwordHash)
 
-    configureRouting(loginUseCase, registerUseCase, getAllReviewsUseCase, addReviewUseCase, editReviewUseCase, deleteReviewUseCase)
+    configureRouting(loginUseCase, registerUseCase, getAllReviewsUseCase, addReviewUseCase, editReviewUseCase, deleteReviewUseCase, userRepository)
 }

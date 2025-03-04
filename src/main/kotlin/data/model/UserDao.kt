@@ -11,13 +11,15 @@ class UserDao(id: EntityID<Int>) : IntEntity(id) {
     var username by UserTable.username
     var email by UserTable.email
     var password by UserTable.password
+    var token by UserTable.token
 
     fun toUser(): User {
         return User(
             id = id.value,
             username = username,
             email = email,
-            password = password
+            password = password,
+            token = token
         )
     }
 }

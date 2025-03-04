@@ -1,5 +1,6 @@
 package ktor.routing
 
+import domain.security.JwtConfig
 import domain.usecase.LoginUseCase
 import domain.usecase.RegisterUseCase
 import io.ktor.http.*
@@ -12,9 +13,9 @@ fun Route.authRoutes(loginUseCase: LoginUseCase, registerUseCase: RegisterUseCas
     route("/auth") {
         post("/login") {
             val request = call.receive<LoginRequest>()
-            val isLoginSuccessful = loginUseCase(request.usernameOrEmail, request.password)
-            if (isLoginSuccessful) {
-                call.respond(HttpStatusCode.OK, "Login successful")
+            val token = loginUseCase(request.usernameOrEmail, request.password)
+            if (token != null) {
+                call.respond(HttpStatusCode.OK, mapOf("token" to token))
             } else {
                 call.respond(HttpStatusCode.Unauthorized, "Invalid credentials")
             }

@@ -14,6 +14,7 @@ class UserRepositoryImpl : UserRepository {
                 username = user.username
                 email = user.email
                 password = user.password
+                token = user.token
             }.toUser()
         }
     }
@@ -23,6 +24,24 @@ class UserRepositoryImpl : UserRepository {
             UserDao.find {
                 (UserTable.username eq usernameOrEmail) or (UserTable.email eq usernameOrEmail)
             }.firstOrNull()?.toUser()
+        }
+    }
+
+    override suspend fun updateUserToken(userId: Int, token: String): Boolean {
+        return suspendTransaction {
+            val user = UserDao.findById(userId)
+            user?.let {
+                it.token = token
+                true
+            } ?: false
+        }
+    }
+
+    override suspend fun getTokenByUsername(username: String): String? {
+        return suspendTransaction {
+            UserDao.find { UserTable.username eq username }
+                .firstOrNull()
+                ?.token
         }
     }
 }
