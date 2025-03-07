@@ -43,7 +43,6 @@ fun Route.reviewRoutes(
                 val username = principal?.payload?.getClaim("username")?.asString()
 
                 if (username != null) {
-                    // Verificar que el token coincida con el almacenado en la base de datos
                     val storedToken = userRepository.getTokenByUsername(username)
                     val providedToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
 

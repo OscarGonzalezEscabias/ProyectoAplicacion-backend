@@ -6,7 +6,7 @@ import domain.repository.ReviewRepository
 class AddReviewUseCase(
     private val reviewRepository: ReviewRepository
 ) {
-    suspend operator fun invoke(title: String, description: String, image: String): Review? {
+    suspend operator fun invoke(title: String, description: String, image: String?): Review? {
         val review = Review(
             id= 0,
             title = title,

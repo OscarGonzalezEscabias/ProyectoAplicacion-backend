@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) UNIQUE NOT NULL,
     description VARCHAR(255) UNIQUE NOT NULL,
-    image VARCHAR(255) NOT NULL
+    image VARCHAR(255)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tabla de reseñas';
 
 INSERT INTO users (username, email, password, token) VALUES
