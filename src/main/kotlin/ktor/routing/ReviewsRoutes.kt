@@ -9,6 +9,8 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.io.File
+import java.util.*
 
 fun Route.reviewRoutes(
     getAllReviewsUseCase: GetAllReviewsUseCase,
@@ -48,7 +50,17 @@ fun Route.reviewRoutes(
 
                     if (storedToken == providedToken) {
                         val request = call.receive<Review>()
-                        val review = addReviewUseCase(request.title, request.description, request.image)
+                        val uploadDir = "res/drawable"
+                        File(uploadDir).mkdirs()
+
+                        val imageName = if (request.image != null) {
+                            val savedImageName = saveImageFromBase64(request.image, uploadDir)
+                            "${savedImageName}"
+                        } else {
+                            null
+                        }
+
+                        val review = addReviewUseCase(request.title, request.description, imageName)
                         if (review != null) {
                             call.respond(HttpStatusCode.Created, "Review created successfully")
                         } else {
@@ -72,13 +84,29 @@ fun Route.reviewRoutes(
 
                     if (storedToken == providedToken) {
                         val id = call.parameters["id"]
-                        val review = call.receive<Review>()
+                        val request = call.receive<Review>()
+                        val uploadDir = "res/drawable"
+
                         id?.let {
-                            val request = editReviewUseCase(id.toInt(), review)
-                            if (!request) {
-                                call.respond(HttpStatusCode.NotFound, "Review not found")
+                            val existingReview = getAllReviewsUseCase().find { it.id == id.toInt() }
+                            if (existingReview != null) {
+                                deleteImage(existingReview.image, uploadDir)
+
+                                val imageName = if (request.image != null) {
+                                    saveImageFromBase64(request.image, uploadDir)
+                                } else {
+                                    null
+                                }
+
+                                val updatedReview = request.copy(image = imageName)
+                                val success = editReviewUseCase(id.toInt(), updatedReview)
+                                if (!success) {
+                                    call.respond(HttpStatusCode.NotFound, "Review not found")
+                                } else {
+                                    call.respond(HttpStatusCode.NoContent)
+                                }
                             } else {
-                                call.respond(HttpStatusCode.NoContent)
+                                call.respond(HttpStatusCode.NotFound, "Review not found")
                             }
                         } ?: run {
                             call.respond(HttpStatusCode.BadRequest, "ID not found")
@@ -96,18 +124,26 @@ fun Route.reviewRoutes(
                 val username = principal?.payload?.getClaim("username")?.asString()
 
                 if (username != null) {
-                    // Verificar que el token coincida con el almacenado en la base de datos
                     val storedToken = userRepository.getTokenByUsername(username)
                     val providedToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
 
                     if (storedToken == providedToken) {
                         val id = call.parameters["id"]
+                        val uploadDir = "res/drawable"
+
                         id?.let {
-                            val request = deleteReviewUseCase(id.toInt())
-                            if (!request) {
-                                call.respond(HttpStatusCode.NotFound, "Review not found")
+                            val existingReview = getAllReviewsUseCase().find { it.id == id.toInt() }
+                            if (existingReview != null) {
+                                deleteImage(existingReview.image, uploadDir)
+
+                                val success = deleteReviewUseCase(id.toInt())
+                                if (!success) {
+                                    call.respond(HttpStatusCode.NotFound, "Review not found")
+                                } else {
+                                    call.respond(HttpStatusCode.NoContent)
+                                }
                             } else {
-                                call.respond(HttpStatusCode.NoContent)
+                                call.respond(HttpStatusCode.NotFound, "Review not found")
                             }
                         } ?: run {
                             call.respond(HttpStatusCode.BadRequest, "ID not found")
@@ -119,6 +155,23 @@ fun Route.reviewRoutes(
                     call.respond(HttpStatusCode.Unauthorized, "Invalid token")
                 }
             }
+        }
+    }
+}
+
+fun saveImageFromBase64(base64Image: String, uploadDir: String): String {
+    val imageBytes = Base64.getDecoder().decode(base64Image)
+    val imageName = "a" + UUID.randomUUID().toString().replace("-", "") + ".jpg"
+    val imageFile = File(uploadDir, imageName)
+    imageFile.writeBytes(imageBytes)
+    return imageName
+}
+
+fun deleteImage(imageName: String?, uploadDir: String) {
+    if (imageName != null) {
+        val imageFile = File(uploadDir, imageName)
+        if (imageFile.exists()) {
+            imageFile.delete()
         }
     }
 }

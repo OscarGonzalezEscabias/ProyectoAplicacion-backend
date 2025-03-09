@@ -39,4 +39,5 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt:3.0.3")  // Autenticación JWT
     implementation("io.ktor:ktor-server-auth:3.0.3")      // Módulo de autenticación
     implementation("com.auth0:java-jwt:4.4.0")            // Librería para manejar JWT
+
 }
